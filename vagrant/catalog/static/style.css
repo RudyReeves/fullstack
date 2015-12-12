@@ -1,0 +1,94 @@
+* {
+  border: 0;
+  margin: 0;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+body {
+  font-size: 18px;
+}
+
+a {
+  text-decoration: none;
+  color: #ef3200;
+}
+
+ul {
+  list-style: none;
+}
+
+header {
+  height: 72px;
+  background-color: #224;
+}
+
+header #logo {
+  color: #fff;
+  float: left;
+  margin-top: 27px;
+  margin-left: 24px;
+  height: 16px;
+}
+
+header #login-button, header #logout-button {
+  float: right;
+  margin-top: 27px;
+  margin-right: 24px;
+  height: 16px;
+}
+
+header #logout-button {
+  font-size: 18px;
+  background: inherit;
+  color: #fff;
+  cursor: hand;
+  margin-top: 27px;
+  margin-right: 24px;
+  height: 16px;
+}
+
+.container, #content {
+  margin-left: 24px;
+}
+
+#categories-container, #content {
+  margin-top: 27px;
+}
+
+#add-item-button {
+  margin-top: 27px;
+}
+
+#categories-section {
+  border-right: 1px solid #a0a0a0;
+  margin-right: 48px;
+  padding-right: 48px;
+}
+
+#categories-section, #latest-items-section {
+  float: left;
+}
+
+#item-description, #delete-question {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+input {
+  margin-top: 24px;
+  background: inherit;
+  font-size: 18px;
+}
+
+select {
+  margin-top: 24px;
+  font-size: 18px;
+}
+
+input[type="submit"] {
+  color: #ef3200;
+}
+
+form input {
+  display: block;
+}

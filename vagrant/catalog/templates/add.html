@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='script.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <title>Add Item</title>
+</head>
+<body>
+
+    <header>
+        <a id="logo" href="/">Catalog App</a>
+        <div id="login-button" style="display:
+        {% if data['logged_in'] %}
+        none
+        {% endif %}
+        {% if not data['logged_in'] %}
+        block
+        {% endif %}
+        ">
+            <span class="g-signin"
+                  data-scope="openid"
+                  data-clientid="163126096200-dmoqe7fl6bg65tktlj7f1nackeqevimr.apps.googleusercontent.com"
+                  data-redirecturi="postmessage"
+                  data-accesstype="offline"
+                  data-cookiepolicy="single_host_origin"
+                  data-callback="loginCallback">
+
+            </span>
+        </div>
+        <button id="logout-button" style="display:
+        {% if data['logged_in'] %}
+        block
+        {% endif %}
+        {% if not data['logged_in'] %}
+        none
+        {% endif %}
+        " onclick="logout()">Logout</button>
+    </header>
+
+    <div class="container">
+        <h2>Add Item</h2>
+        <form action="/catalog/add" method="post">
+            <input type="text" name="item_name" placeholder="Item name">
+            <input type="text" name="item_description" placeholder="Item description">
+            <select name="category_name">
+                {% for category in data['categories'] %}
+                <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+
+    <script>
+        function loginCallback(authResult) {
+            if (authResult['code']) {
+                {% if not data['logged_in']  %}
+                $.ajax({
+                    type: 'POST',
+                    url: '/gconnect?state={{ data['state'] }}',
+                    processData: false,
+                    contentType: 'application/octet-stream; charset=utf-8',
+                    data: authResult['code'],
+                    success: function(result) {
+                        $('#login-button').attr('style', 'display: none');
+                        $('#logout-button').attr('style', 'display: block');
+                    }
+                });
+                {% endif %}
+            } else if (authResult['error']) {
+                console.log("Login error: " + authResult['error']);
+            } else {
+                $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+            }
+        }
+
+        function logout() {
+            $.ajax({
+                type: 'POST',
+                url: '/gdisconnect',
+                success: function(result) {
+                    $('#login-button').attr('style', 'display: block');
+                    $('#logout-button').attr('style', 'display: none');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
