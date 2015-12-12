@@ -143,8 +143,6 @@ def edit_item(item_name):
     # Ensure the logged-in user owns this item:
     item = query.one()
     if item.user_id != login_session['user_id']:
-        print(login_session['user_id'])
-        print(item.user_id)
         return redirect('/')
 
     if request.method == 'POST':
