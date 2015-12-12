@@ -1,5 +1,5 @@
 # catalog
-A web app presenting a catalog of editable, categorized items, using Python's Flask and SQLAlchemy frameworks.
+A web app presenting a catalog of items, using Python's Flask and SQLAlchemy frameworks.
 
 # Requirements
 * Python (v2.7+)
@@ -19,4 +19,4 @@ A web app presenting a catalog of editable, categorized items, using Python's Fl
 # Usage
 * Navigate to "localhost:8000" in your browser. Create/view/edit/delete items as you wish.
 * Retrieve the JSON-formatted catalog from "localhost:8000/catalog.json"
-* Retrieve the XML-formatted catalog from "localhost:8000/catalog.xml" (unimplemented)
+* Retrieve the XML-formatted catalog from "localhost:8000/catalog.xml"
