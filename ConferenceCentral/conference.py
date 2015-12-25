@@ -556,7 +556,13 @@ class ConferenceApi(remote.Service):
 # - - - Sessions - - - - - - - - - - - - - - - - - - - -
 
     def _copySessionToForm(self, sess):
-        pass
+        """Copy relevant fields from session to SessionForm."""
+        sf = SessionForm()
+        for field in sf.all_fields():
+            if hasattr(sess, field.name):
+                setattr(sf, field.name, getattr(sess, field.name))
+        sf.check_initialized()
+        return sf
 
     @endpoints.method(CONF_GET_REQUEST, SessionForms,
         path='getConferenceSessions/{websafeConferenceKey}',
@@ -564,7 +570,7 @@ class ConferenceApi(remote.Service):
     def getConferenceSessions(self, request):
         """Gets all the sessions in the given conference"""
         q = Session.query()
-        q = q.filter(ancestor=websafeConferenceKey)
+        q = q.ancestor(websafeConferenceKey)
         q = q.order(Session.name)
         return SessionForms(
             items=[self._copySessionToForm(sess) for sess in q]
