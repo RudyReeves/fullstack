@@ -570,6 +570,32 @@ class ConferenceApi(remote.Service):
         sf.check_initialized()
         return sf
 
+    def _createSessionObject(self, request):
+        """Create or update Session object, returning SessionForm/request."""
+        user = endpoints.get_current_user()
+        if not user:
+            raise endpoints.UnauthorizedException('Authorization required')
+        user_id = getUserId(user)
+
+        if not request.websafeConferenceKey:
+            raise endpoints.BadRequestException("The session must belong to a valid conference.")
+
+        conf = ndb.query(urlsafe=request.websafeConferenceKey)
+        c_key = conf.key()
+
+        if (conf.organizerUserId != user_id):
+            raise endpoints.UnauthorizedException("Only the conference organizer can create sessions")
+
+        data = {field.name: getattr(request, field.name) for field in request.all_fields()}
+
+        s_id = Session.allocate_ids(size=1, parent=conf.)[0]
+        s_key = ndb.Key(Conference, s_id, parent=c_key)
+        data['key'] = s_key
+        conf.sessions.append(data)
+
+        Session(**data).put()
+        return request
+
     @endpoints.method(CONF_GET_REQUEST, SessionForms,
         path='getConferenceSessions/{websafeConferenceKey}',
         http_method='GET', name='getConferenceSessions')
@@ -602,6 +628,6 @@ class ConferenceApi(remote.Service):
         http_method='POST', name='createSession')
     def createSession(self, request):
         """Creates a new session in a conference, by the organizer of the conference."""
-        pass
+        return self._createSessionObject(request)
 
 api = endpoints.api_server([ConferenceApi]) # register API
