@@ -122,9 +122,9 @@ class SessionForm(messages.Message):
     """An outbound session form."""
     name          = messages.StringField(1)
     speaker       = messages.StringField(2)
-    startTime     = messages.IntegerField(3, variant=message.Variant.INT32)
+    startTime     = messages.IntegerField(3, variant=messages.Variant.INT32)
     typeofSession = messages.StringField(4)
-    duration      = messages.IntegerField(5, variant=message.Variant.INT32)
+    duration      = messages.IntegerField(5, variant=messages.Variant.INT32)
     highlights    = messages.StringField(6, repeated=True)
     websafeKey    = messages.StringField(7)
 

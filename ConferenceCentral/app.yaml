@@ -1,4 +1,4 @@
-application: jovial-duality-116918
+application: fullstack-conference-organizer
 version: 1
 runtime: python27
 api_version: 1
