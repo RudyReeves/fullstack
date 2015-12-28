@@ -60,7 +60,6 @@ class Conference(ndb.Model):
     endDate         = ndb.DateProperty()
     maxAttendees    = ndb.IntegerProperty()
     seatsAvailable  = ndb.IntegerProperty()
-    sessions        = ndb.StringProperty(repeated=True)
 
 class ConferenceForm(messages.Message):
     """ConferenceForm -- Conference outbound form message"""
@@ -73,9 +72,9 @@ class ConferenceForm(messages.Message):
     month           = messages.IntegerField(7, variant=messages.Variant.INT32)
     maxAttendees    = messages.IntegerField(8, variant=messages.Variant.INT32)
     seatsAvailable  = messages.IntegerField(9, variant=messages.Variant.INT32)
-    endDate         = messages.StringField(10) #DateTimeField()
-    websafeKey      = messages.StringField(11)
-    organizerDisplayName = messages.StringField(12)
+    endDate         = messages.StringField(11) #DateTimeField()
+    websafeKey      = messages.StringField(12)
+    organizerDisplayName = messages.StringField(13)
 
 class ConferenceForms(messages.Message):
     """ConferenceForms -- multiple Conference outbound form message"""
@@ -109,21 +108,21 @@ class ConferenceQueryForms(messages.Message):
     """ConferenceQueryForms -- multiple ConferenceQueryForm inbound form message"""
     filters = messages.MessageField(ConferenceQueryForm, 1, repeated=True)
 
-class Session(Conference):
+class Session(ndb.Model):
     """A session within a conference."""
     name          = ndb.StringProperty()
+    typeOfSession = ndb.StringProperty()
     speaker       = ndb.StringProperty()
     startTime     = ndb.IntegerProperty()
-    typeOfSession = ndb.StringProperty()
     duration      = ndb.IntegerProperty()
     highlights    = ndb.StringProperty(repeated=True)
 
 class SessionForm(messages.Message):
     """An outbound session form."""
     name          = messages.StringField(1)
-    speaker       = messages.StringField(2)
-    startTime     = messages.IntegerField(3, variant=messages.Variant.INT32)
-    typeofSession = messages.StringField(4)
+    typeOfSession = messages.StringField(2)
+    speaker       = messages.StringField(3)
+    startTime     = messages.IntegerField(4, variant=messages.Variant.INT32)
     duration      = messages.IntegerField(5, variant=messages.Variant.INT32)
     highlights    = messages.StringField(6, repeated=True)
     websafeKey    = messages.StringField(7)

@@ -88,8 +88,14 @@ CONF_POST_REQUEST = endpoints.ResourceContainer(
 )
 
 SESS_GET_REQUEST = endpoints.ResourceContainer(
+    message_types.VoidMessage,
+    speaker=messages.StringField(1),
+    typeOfSession=messages.StringField(2),
+)
+
+SESS_POST_REQUEST = endpoints.ResourceContainer(
     SessionForm,
-    websafeSessionId=messages.StringField(1),
+    websafeConferenceKey=messages.StringField(1),
 )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -578,56 +584,76 @@ class ConferenceApi(remote.Service):
         user_id = getUserId(user)
 
         if not request.websafeConferenceKey:
-            raise endpoints.BadRequestException("The session must belong to a valid conference.")
+            raise endpoints.BadRequestException(
+                "The session must belong to a valid conference."
+            )
 
-        conf = ndb.query(urlsafe=request.websafeConferenceKey)
-        c_key = conf.key()
+        c_key = ndb.Key(urlsafe=request.websafeConferenceKey)
+        conf = c_key.get()
 
         if (conf.organizerUserId != user_id):
-            raise endpoints.UnauthorizedException("Only the conference organizer can create sessions")
+            raise endpoints.UnauthorizedException(
+                "Only the conference organizer can\
+                 create sessions in this conference."
+            )
 
-        data = {field.name: getattr(request, field.name) for field in request.all_fields()}
+        data = {field.name: getattr(request, field.name) for field\
+            in request.all_fields()}
+        del data['websafeConferenceKey']
+        del data['websafeKey']
 
-        s_id = Session.allocate_ids(size=1, parent=conf.)[0]
-        s_key = ndb.Key(Conference, s_id, parent=c_key)
+        s_id = Session.allocate_ids(size=1, parent=c_key)[0]
+        s_key = ndb.Key(Session, s_id, parent=c_key)
         data['key'] = s_key
-        conf.sessions.append(data)
-
         Session(**data).put()
-        return request
+
+        return self._copySessionToForm(s_key.get())
 
     @endpoints.method(CONF_GET_REQUEST, SessionForms,
-        path='getConferenceSessions/{websafeConferenceKey}',
+        path='getConferenceSessions/',
         http_method='GET', name='getConferenceSessions')
     def getConferenceSessions(self, request):
         """Gets all the sessions in the given conference."""
         c_key = ndb.Key(urlsafe=request.websafeConferenceKey)
-        q = Session.query()
-        q = q.ancestor(c_key)
-        q = q.order(Session.name)
+        q = Session.query(ancestor=c_key)
+        q = q.fetch()
         return SessionForms(
             items=[self._copySessionToForm(sess) for sess in q]
         )
 
-    @endpoints.method(CONF_GET_REQUEST, SessionForms,
+    @endpoints.method(SESS_GET_REQUEST, SessionForms,
         path='getConferenceSessionsByType/',
         http_method='GET', name='getConferenceSessionsByType')
     def getConferenceSessionsByType(self, request):
         """Gets all the sessions in a conference, of a given type."""
-        pass
+        q = Session.query()
+        q = q.filter(Session.typeOfSession == request.typeOfSession)
+        print(q)
+        q = q.fetch()
+        print(q)
+        return SessionForms(
+            items=[self._copySessionToForm(sess) for sess in q]
+        )
 
     @endpoints.method(SESS_GET_REQUEST, SessionForms,
         path='getSessionsBySpeaker/',
         http_method='GET', name='getSessionsBySpeaker')
     def getSessionsBySpeaker(self, request):
         """Gets all the sessions from a given speaker, accross conferences."""
-        pass
+        q = Session.query()
+        q = q.filter(Session.speaker == request.speaker)
+        q = q.fetch()
+        return SessionForms(
+            items=[self._copySessionToForm(sess) for sess in q]
+        )
 
-    @endpoints.method(CONF_POST_REQUEST, SessionForm,
+    @endpoints.method(SESS_POST_REQUEST, SessionForm,
         path='createSession/',
         http_method='POST', name='createSession')
     def createSession(self, request):
-        """Creates a new session in a conference, by the organizer of the conference."""
+        """Creates a new session in a conference,
+        by the organizer of the conference.
+        """
         return self._createSessionObject(request)
 
 api = endpoints.api_server([ConferenceApi]) # register API
