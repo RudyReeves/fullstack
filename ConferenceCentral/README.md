@@ -24,16 +24,18 @@ App Engine application for the Udacity training course.
 1. Deploy your application.
 
 ## Sessions
-1. Conferences can have multiple sessions. A session can be created through '/createSession'.
+Conferences can have multiple sessions. A session can be created through '/createSession'.
 
 ## Querying sessions
 All sessions in a conference can be got through these endpoints:
+
 1. '/getConferenceSessions' to get all sessions in a conference.
 2. '/getConferenceSessionsByType' to get all sessions in a conference with a specified conference type.
 3. '/getSessionsBySpeaker', to get all sessions in a conference with a specified speaker.
 
 ## Wishlists
 Users can manage wishlists of sessions they want to attend, via these endpoints:
+
 1. '/getSessionsInWishlist' to get a list of all Sessions in the user's wishlist
 2. '/addSessionToWishlist' to add a Session
 3. '/deleteSessionsInWishlist' to delete Sessions
