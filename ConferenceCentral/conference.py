@@ -98,8 +98,12 @@ SESS_POST_REQUEST = endpoints.ResourceContainer(
     websafeConferenceKey=messages.StringField(1),
 )
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+WISHLIST_POST_REQUEST = endpoints.ResourceContainer(
+    message_types.VoidMessage,
+    websafeSessionKey=messages.StringField(1),
+)
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 @endpoints.api(name='conference', version='v1', audiences=[ANDROID_AUDIENCE],
     allowed_client_ids=[WEB_CLIENT_ID, API_EXPLORER_CLIENT_ID, ANDROID_CLIENT_ID, IOS_CLIENT_ID],
@@ -628,9 +632,7 @@ class ConferenceApi(remote.Service):
         """Gets all the sessions in a conference, of a given type."""
         q = Session.query()
         q = q.filter(Session.typeOfSession == request.typeOfSession)
-        print(q)
         q = q.fetch()
-        print(q)
         return SessionForms(
             items=[self._copySessionToForm(sess) for sess in q]
         )
@@ -655,5 +657,50 @@ class ConferenceApi(remote.Service):
         by the organizer of the conference.
         """
         return self._createSessionObject(request)
+
+    @endpoints.method(message_types.VoidMessage, message_types.VoidMessage,
+        path='updateWebsafeSessionKeys/',
+        http_method='POST', name='updateWebsafeSessionKeys')
+    def updateWebsafeSessionKeys(self, request):
+        """Updates the websafeSessionKey for all sessions."""
+        q = Session.query()
+        for session in q:
+            session.websafeSessionKey = session.key.urlsafe()
+            session.put()
+
+# - - - Wishlists - - - - - - - - - - - - - - - - - - - -
+
+    @endpoints.method(WISHLIST_POST_REQUEST, message_types.VoidMessage,
+        path='addSessionToWishlist/',
+        http_method='POST', name='addSessionToWishlist')
+    def addSessionToWishlist(self, request):
+        """Adds a session to a user's wishlist."""
+        prof = self._getProfileFromUser()
+        s_key = ndb.Key(urlsafe=request.websafeSessionKey)
+        prof.sessionsWishlist.append(s_key)
+        return message_types.VoidMessage()
+
+    @endpoints.method(message_types.VoidMessage, SessionForms,
+        path='getSessionsInWishlist/',
+        http_method='GET', name='getSessionsInWishlist')
+    def getSessionsInWishlist(self, request):
+        """Gets all the sessions in a user's wishlist."""
+        prof = self._getProfileFromUser()
+        return SessionForms(
+            items=[self._copySessionToForm(sess) for sess in prof.sessionsWishlist]
+        )
+
+    @endpoints.method(WISHLIST_POST_REQUEST, message_types.VoidMessage,
+        path='deleteSessionsInWishlist/',
+        http_method='POST', name='deleteSessionsInWishlist')
+    def deleteSessionsInWishlist(self, request):
+        """Deletes a session from a user's wishlist."""
+        prof = self._getProfileFromUser()
+        s_key = ndb.Key(urlsafe=request.websafeSessionKey)
+        if s_key in prof.sessionsWishlist:
+            prof.sessionWishlist.remove(s_key)
+        else:
+            raise endpoints.BadRequestException('That session is not in your wishlist.')
+        return message_types.VoidMessage()
 
 api = endpoints.api_server([ConferenceApi]) # register API
