@@ -30,7 +30,7 @@ Conferences can have multiple sessions. A session can be created through '/creat
 All sessions in a conference can be got through these endpoints:
 
 1. '/getConferenceSessions' to get all sessions in a conference.
-2. '/getConferenceSessionsByType' to get all sessions in a conference with a specified conference type.
+2. '/getConferenceSessionsByType' to get all sessions in a conference with a specified type.
 3. '/getSessionsBySpeaker', to get all sessions in a conference with a specified speaker.
 
 ## Wishlists
